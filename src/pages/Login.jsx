@@ -3,7 +3,7 @@ import { useState } from "react";
 import axios from "axios";
 import AuthLayout from "../Component/AuthLayout";
 import toast from "react-hot-toast";
-
+const API = import.meta.env.VITE_API_URL;
 export default function Login() {
   const navigate = useNavigate();
 
@@ -17,7 +17,7 @@ export default function Login() {
 
     try {
       await axios.post(
-        "http://localhost:5000/auth/login", // ✅ correct backend route
+        `${API}/auth/login`, // ✅ correct backend route
         form,
         { withCredentials: true } // ⭐ cookie important
       );

@@ -3,7 +3,7 @@ import { useState } from "react";
 import axios from "axios";
 import AuthLayout from "../Component/AuthLayout";
 import { toast, Toaster } from "react-hot-toast";
-
+const API = import.meta.env.VITE_API_URL;
 export default function Signup() {
   const navigate = useNavigate();
 
@@ -21,7 +21,7 @@ export default function Signup() {
 
     try {
       await axios.post(
-        "http://localhost:5000/auth/signup",
+        `${API}/auth/signup`,
         form,
         { withCredentials: true } // ⭐ cookie important
       );

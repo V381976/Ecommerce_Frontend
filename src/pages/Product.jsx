@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import axios from "axios";
 import ProductCard from "../Component/ProductCard";
 import { Toaster } from "react-hot-toast";
-
+const API = import.meta.env.VITE_API_URL;
 function Product() {
   const [products, setProducts] = useState([]);
   const [categories, setCategories] = useState([]);
@@ -13,12 +13,12 @@ function Product() {
   // ================= FETCH PRODUCTS + CATEGORIES =================
   useEffect(() => {
     axios
-      .get("http://localhost:5000/api/products")
+      .get(`${API}/api/products`)
       .then((res) => setProducts(res.data))
       .catch((err) => console.log(err));
 
     axios
-      .get("http://localhost:5000/api/categories")
+      .get(`${API}/api/categories`)
       .then((res) => setCategories(res.data))
       .catch((err) => console.log(err));
   }, []);
@@ -61,7 +61,7 @@ function Product() {
           className={`px-4 py-1 rounded-full border ${
             selectedCategory === "ALL"
               ? "bg-indigo-600 text-white"
-              : "bg-white"
+              : "bg-amber-300"
           }`}
         >
           All
@@ -73,8 +73,8 @@ function Product() {
             onClick={() => setSelectedCategory(c.name)}
             className={`px-4 py-1 rounded-full border ${
               selectedCategory === c.name
-                ? "bg-indigo-600 text-white"
-                : "bg-white"
+                ? "bg-indigo-300 text-black"
+                : "bg-amber-100"
             }`}
           >
             {c.name}

@@ -1,14 +1,14 @@
 import { useEffect, useState } from "react";
 import { Navigate } from "react-router-dom";
 import axios from "axios";
-
+const API = import.meta.env.VITE_API_URL;
 export default function ProtectedRoute({ children }) {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     axios
-      .get("http://localhost:5000/auth/me", {
+      .get(`${API}/auth/me`, {
         withCredentials: true,
       })
       .then((res) => setUser(res.data))

@@ -1,152 +1,182 @@
 import { Link, useNavigate } from "react-router-dom";
-import React, { useEffect, useState } from "react";
+import  { useEffect, useState } from "react";
 import axios from "axios";
-import { motion } from "framer-motion";
+import { motion, AnimatePresence } from "framer-motion";
+const API = import.meta.env.VITE_API_URL;
 
 function Home() {
   const [categories, setCategories] = useState([]);
   const [brands, setBrands] = useState([]);
   const [products, setProducts] = useState([]);
-  const [offers, setOffers] = useState([]); // ⭐ NEW
+  const [offers, setOffers] = useState([]);
+  const [banners, setBanners] = useState([]);
+
+  const [index, setIndex] = useState(0);
+  const [pause, setPause] = useState(false);
 
   const navigate = useNavigate();
 
-  /* ================= FETCH ALL ================= */
+  /* ================= FETCH ================= */
   useEffect(() => {
-    axios.get("http://localhost:5000/api/products").then(res => setProducts(res.data));
-    axios.get("http://localhost:5000/api/categories").then(res => setCategories(res.data));
-    axios.get("http://localhost:5000/api/brands").then(res => setBrands(res.data));
+    const fetchAll = async () => {
+      const [p, c, b, o, ba] = await Promise.all([
+        axios.get(`${API}/api/products`),
+        axios.get(`${API}/api/categories`),
+        axios.get(`${API}/api/brands`),
+        axios.get(`${API}/api/offers`),
+        axios.get(`${API}/api/banner`),
+      ]);
 
-    // ⭐ OFFER FETCH
-    axios.get("http://localhost:5000/api/offer").then(res => setOffers(res.data));
+      setProducts(p.data);
+      setCategories(c.data);
+      setBrands(b.data);
+      setOffers(o.data);
+      setBanners(ba.data);
+    };
+
+    fetchAll();
   }, []);
 
- 
+  /* ================= AUTO SLIDER ================= */
+  useEffect(() => {
+    if (!banners.length || pause) return;
 
-  const fadeLeft = {
-    hidden: { opacity: 0, x: -60 },
-    show: { opacity: 1, x: 0, transition: { duration: 0.7 } }
-  };
+    const timer = setInterval(() => {
+      setIndex((prev) => (prev + 1) % banners.length);
+    }, 2200);
 
-  const fadeRight = {
-    hidden: { opacity: 0, x: 60 },
-    show: { opacity: 1, x: 0, transition: { duration: 0.7 } }
-  };
+    return () => clearInterval(timer);
+  }, [banners, pause]);
+
+  const next = () => setIndex((index + 1) % banners.length);
+  const prev = () =>
+    setIndex((index - 1 + banners.length) % banners.length);
 
   return (
-    <div className="min-h-screen text-white px-6">
+    <div className="min-h-screen text-white px-6 ">
 
-      {/* ================= HERO ================= */}
-      <section className="max-w-7xl mx-auto grid md:grid-cols-2 items-center gap-10 py-20">
-        <motion.div variants={fadeLeft} initial="hidden" animate="show" className="space-y-6">
-          <h1 className="text-5xl md:text-6xl font-bold">
-            Welcome to <span className="text-yellow-300">ShopEase</span>
-          </h1>
-          <Link to="/products" className="bg-white text-indigo-600 px-6 py-3 rounded-xl font-semibold">
-            Shop Now
-          </Link>
-        </motion.div>
+      {/* ================= HERO BANNER SLIDER ================= */}
+     {/* ================= HERO BANNER SLIDER ================= */}
+{banners.length > 0 && (
+  <div
+    className="w-full pt-5 relative overflow-hidden"
+    onMouseEnter={() => setPause(true)}
+    onMouseLeave={() => setPause(false)}
+  >
+    {/* HEIGHT FIX (real ecommerce style) */}
+    <div className="relative w-full h-55 sm:h-80 md:h-105 lg:h-130 rounded-3xl overflow-hidden shadow-2xl">
 
+      <AnimatePresence mode="wait">
         <motion.img
-          variants={fadeRight}
-          initial="hidden"
-          animate="show"
-          src="https://images.unsplash.com/photo-1607082348824-0a96f2a4b9da"
-          className="rounded-3xl shadow-2xl"
+          key={index}
+          src={`${API}/${banners[index].image}`}
+          onClick={() => navigate(banners[index].link)}
+          initial={{ opacity: 0, scale: 1.08 }}
+          animate={{ opacity: 1, scale: 1 }}
+          exit={{ opacity: 0 }}
+          transition={{ duration: 0.5 }}
+          className="
+            absolute inset-0
+            w-full h-full
+            object-cover object-center
+            cursor-pointer
+            select-none
+          "
+          draggable={false}
         />
-      </section>
+      </AnimatePresence>
 
+      {/* Dark overlay for text visibility */}
+      <div className="absolute inset-0 bg-black/25" />
+
+      {/* LEFT ARROW */}
+      <button
+        onClick={prev}
+        className="absolute left-4 top-1/2 -translate-y-1/2 bg-white/30 hover:bg-white/50 backdrop-blur px-4 py-2 rounded-full text-black"
+      >
+        ❮
+      </button>
+
+      {/* RIGHT ARROW */}
+      <button
+        onClick={next}
+        className="absolute right-4 top-1/2 -translate-y-1/2 bg-white/30 hover:bg-white/50 backdrop-blur px-4 py-2 rounded-full text-black"
+      >
+        ❯
+      </button>
+
+      {/* DOTS */}
+      <div className="absolute bottom-4 left-1/2 -translate-x-1/2 flex gap-2">
+        {banners.map((_, i) => (
+          <div
+            key={i}
+            onClick={() => setIndex(i)}
+            className={`h-2 rounded-full transition-all cursor-pointer ${
+              i === index ? "w-6 bg-white" : "w-2 bg-white/40"
+            }`}
+          />
+        ))}
+      </div>
+    </div>
+  </div>
+)}
+
+
+      {/* ================= OFFER STRIP ================= */}
+      {offers.length > 0 && (
+        <div className="max-w-7xl mx-auto mb-6 mt-5 bg-linear-to-r from-red-600 to-pink-600 py-3 px-6 rounded-xl text-center font-semibold shadow-lg">
+          🔥 {offers[0]?.discountPercent}% OFF – Limited Time Offer!
+        </div>
+      )}
 
       {/* ================= CATEGORIES ================= */}
- <section className="max-w-7xl mx-auto py-10">
-  <h2 className="text-2xl font-semibold mb-6">Categories</h2>
+      <section className="max-w-7xl mx-auto py-10">
+        <h2 className="text-2xl font-semibold mb-6">Categories</h2>
 
-  <div className="flex gap-4 overflow-x-auto scrollbar-hide">
+        <div className="flex gap-4 overflow-x-auto">
+          {categories.slice(0, 8).map((c) => {
+            const offer = offers.find(o => o.category?._id === c._id);
 
-    {categories.slice(0, 8).map((c) => {
-      const offer = offers.find(o => o.category?._id === c._id);
-
-      return (
-        <Link
-          key={c._id}
-          to={`/products?category=${c.name}`}
-          className="relative bg-white/20 px-6 py-3 rounded-xl whitespace-nowrap hover:bg-white hover:text-black transition flex items-center gap-2"
-        >
-          {c.name}
-
-          {/* ⭐ INSIDE BADGE (NO CUT EVER) */}
-          {offer && (
-            <span className="bg-red-600 text-white text-[10px] px-2 py-0.5 rounded-full">
-              {offer.discountPercent}% OFF
-            </span>
-          )}
-        </Link>
-      );
-    })}
-
-  </div>
-</section>
-
-
-
-
-      {/* ================= BRANDS ================= */}
-   <section className="max-w-7xl mx-auto py-10">
-  <h2 className="text-2xl font-semibold mb-6">Brands</h2>
-
-  <div className="flex gap-4 overflow-x-auto scrollbar-hide">
-
-    {brands.slice(0, 8).map((b) => {
-      const offer = offers.find(o => o.brand?._id === b._id);
-
-      return (
-        <Link
-          key={b._id}
-          to={`/products?brand=${b.name}`}
-          className="bg-yellow-400 text-black px-6 py-3 rounded-xl whitespace-nowrap flex items-center gap-2 hover:scale-105 transition"
-        >
-          {b.name}
-
-          {offer && (
-            <span className="bg-red-600 text-white text-[10px] px-2 py-[2px] rounded-full">
-              {offer.discountPercent}% OFF
-            </span>
-          )}
-        </Link>
-      );
-    })}
-
-  </div>
-</section>
-
-
-
+            return (
+              <Link
+                key={c._id}
+                to={`/products?category=${c.name}`}
+                className="bg-white/20 px-6 py-3 rounded-xl whitespace-nowrap hover:bg-white/30 transition"
+              >
+                {c.name}
+                {offer && (
+                  <span className="ml-2 bg-red-600 text-xs px-2 py-1 rounded-full">
+                    {offer.discountPercent}% OFF
+                  </span>
+                )}
+              </Link>
+            );
+          })}
+        </div>
+      </section>
 
       {/* ================= PRODUCTS ================= */}
       <section className="max-w-7xl mx-auto py-12">
         <h2 className="text-2xl font-semibold mb-8">Products</h2>
 
         <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
-
           {products.slice(0, 8).map((p) => (
-            <div
+            <motion.div
               key={p._id}
-              className="bg-white text-black rounded-xl p-4 shadow hover:scale-105 transition"
+              whileHover={{ scale: 1.05 }}
+              className="bg-amber-300 text-black rounded-xl p-4 shadow cursor-pointer"
+              onClick={() => navigate(`/products/${p._id}`)}
             >
               <img
-                onClick={() => navigate(`/products/${p._id}`)}
-                src={`http://localhost:5000/${p.thumbnail}`}
+                src={`${API}/${p.thumbnail}`}
                 className="h-36 w-full object-cover rounded"
               />
-
-              <h3 className="mt-3 font-semibold line-clamp-1">{p.title}</h3>
+              <h3 className="mt-3 font-semibold">{p.title}</h3>
               <p className="text-green-600 font-bold">₹ {p.price}</p>
-            </div>
+            </motion.div>
           ))}
-
         </div>
       </section>
-
     </div>
   );
 }

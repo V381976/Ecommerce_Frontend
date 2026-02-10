@@ -3,7 +3,7 @@ import { useParams, useNavigate } from "react-router-dom";
 import axios from "axios";
 import toast from "react-hot-toast";
 import { FaCartPlus, FaStar } from "react-icons/fa";
-
+const API = import.meta.env.VITE_API_URL;
 function ProductDetails() {
   const { id } = useParams();
   const navigate = useNavigate();
@@ -16,7 +16,7 @@ function ProductDetails() {
 
   useEffect(() => {
     axios
-      .get(`http://localhost:5000/api/products/${id}`)
+      .get(`${API}/api/products/${id}`)
       .then((res) => {
         setProduct(res.data);
         setActiveImage(res.data.thumbnail);
@@ -25,14 +25,20 @@ function ProductDetails() {
   }, [id]);
 
 
-     const addToCart = async () => {
+    const addToCart = async () => {
+  try {
     await axios.post(
-      "http://localhost:5000/cart/add",
+      `${API}/cart/add`,
       { productId: product._id },
       { withCredentials: true }
     );
+
+    toast.success("Added to cart ✅"); // ✅ inside
+  } catch (err) {
+    toast.error("Failed to add cart");
   }
-    toast.success("Added to cart");
+};
+
 
   if (!product) return <p className="p-6">Loading...</p>;
 
@@ -45,13 +51,13 @@ function ProductDetails() {
     // ✅ Background added
     <div className="min-h-screen  p-6">
 
-      <div className="max-w-7xl mx-auto bg-white rounded-2xl shadow-xl p-8">
+      <div className="max-w-7xl mx-auto bg-amber-300 rounded-2xl shadow-xl p-8">
 
         <button
           onClick={() => navigate(-1)}
-          className="mb-4 text-blue-500 hover:underline"
+          className="mb-4 text-amber-950 hover:underline "
         >
-          ← Back
+          🔙
         </button>
 
         <div className="grid md:grid-cols-2 gap-10">
@@ -59,7 +65,7 @@ function ProductDetails() {
           {/* LEFT IMAGE GALLERY */}
           <div>
             <img
-              src={`http://localhost:5000/${activeImage}`}
+              src={`${API}/${activeImage}`}
               className="w-full h-96 object-cover rounded-xl shadow-lg"
             />
 
@@ -67,7 +73,7 @@ function ProductDetails() {
               {[product.thumbnail, ...(product.images || [])].map((img, i) => (
                 <img
                   key={i}
-                  src={`http://localhost:5000/${img}`}
+                  src={`${API}/${img}`}
                   onClick={() => setActiveImage(img)}
                   className="h-20 w-20 object-cover rounded cursor-pointer border hover:border-black"
                 />
@@ -122,7 +128,7 @@ function ProductDetails() {
             <p className="text-gray-600">{product.description}</p>
 
             {/* Warranty + Return */}
-            <div className="bg-gray-100 p-3 rounded-lg text-sm">
+            <div className="bg-amber-200 p-3 rounded-lg text-sm">
               <p>Warranty: {product.warrantyInformation || "No warranty"}</p>
               <p>Return: {product.returnPolicy || "No return policy"}</p>
             </div>
@@ -130,7 +136,7 @@ function ProductDetails() {
             {/* Add to Cart */}
             <button
               onClick={addToCart}
-              className="bg-black text-white px-6 py-3 rounded-lg flex items-center gap-2 hover:bg-gray-800 transition"
+              className="bg-amber-700 text-white px-6 py-3 rounded-lg flex items-center gap-2 hover:bg-gray-800 transition"
             >
               <FaCartPlus />
               Add to Cart

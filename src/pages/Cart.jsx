@@ -1,14 +1,14 @@
 import { useEffect, useState } from "react";
 import axios from "axios";
 import { Link } from "react-router-dom";
-
+const API = import.meta.env.VITE_API_URL;
 
 export default function Cart() {
   const [cart, setCart] = useState(null);
 
   const fetchCart = () => {
     axios
-      .get("http://localhost:5000/cart", {
+      .get(`${API}/cart`, {
         withCredentials: true,
       })
       .then((res) => setCart(res.data));
@@ -22,7 +22,7 @@ export default function Cart() {
     if (qty < 1) return;
 
     await axios.post(
-      "http://localhost:5000/cart/update",
+      `${API}/cart/update`,
       { productId, quantity: qty },
       { withCredentials: true }
     );
@@ -36,7 +36,7 @@ export default function Cart() {
 
   const removeItem = async (productId) => {
     await axios.post(
-      "http://localhost:5000/cart/remove",
+      `${API}/cart/remove`,
       { productId },
       { withCredentials: true }
     );
@@ -71,7 +71,7 @@ export default function Cart() {
           >
             {/* IMAGE */}
             <img
-              src={`http://localhost:5000/${item.product.thumbnail}`}
+              src={`${API}/${item.product.thumbnail}`}
               className="w-28 h-28 rounded-lg object-cover"
               alt=""
             />

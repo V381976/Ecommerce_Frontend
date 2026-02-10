@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import axios from "axios";
-
+const API = import.meta.env.VITE_API_URL;
 export default function MyOrders() {
 
   const [orders, setOrders] = useState([]);
@@ -9,7 +9,7 @@ export default function MyOrders() {
 
   useEffect(() => {
     axios
-      .get(`http://localhost:5000/orders/user/${userId}` ,{
+      .get(`${API}/orders/user/${userId}` ,{
          withCredentials: true
          })
       .then(res => setOrders(res.data || []));
