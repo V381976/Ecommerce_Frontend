@@ -3,8 +3,11 @@ import { useParams, useNavigate } from "react-router-dom";
 import axios from "axios";
 import toast from "react-hot-toast";
 import { FaCartPlus, FaStar } from "react-icons/fa";
+
 const API = import.meta.env.VITE_API_URL;
+
 function ProductDetails() {
+
   const { id } = useParams();
   const navigate = useNavigate();
 
@@ -12,8 +15,7 @@ function ProductDetails() {
   const [activeImage, setActiveImage] = useState("");
 
 
- 
-
+  /* ================= FETCH PRODUCT ================= */
   useEffect(() => {
     axios
       .get(`${API}/api/products/${id}`)
@@ -21,48 +23,50 @@ function ProductDetails() {
         setProduct(res.data);
         setActiveImage(res.data.thumbnail);
       })
-      .catch((err) => console.log(err));
+      .catch(console.log);
   }, [id]);
 
 
-    const addToCart = async () => {
-  try {
-    await axios.post(
-      `${API}/cart/add`,
-      { productId: product._id },
-      { withCredentials: true }
-    );
+  /* ================= ADD TO CART ================= */
+  const addToCart = async () => {
+    try {
+      await axios.post(
+        `${API}/cart/add`,
+        { productId: product._id },
+        { withCredentials: true }
+      );
 
-    toast.success("Added to cart ✅"); // ✅ inside
-  } catch (err) {
-    toast.error("Failed to add cart");
-  }
-};
+      toast.success("Added to cart 🛒");
+
+    } catch {
+      navigate("/login");
+    }
+  };
 
 
   if (!product) return <p className="p-6">Loading...</p>;
 
-  const discountPrice =
-    product.discountPercent
-      ? product.price - (product.price * product.discountPercent) / 100
-      : product.price;
+
+  const hasOffer = product.discountPercent > 0;
+
 
   return (
-    // ✅ Background added
-    <div className="min-h-screen  p-6">
+    <div className="min-h-screen p-6">
 
       <div className="max-w-7xl mx-auto bg-amber-300 rounded-2xl shadow-xl p-8">
 
         <button
           onClick={() => navigate(-1)}
-          className="mb-4 text-amber-950 hover:underline "
+          className="mb-4 hover:underline"
         >
-          🔙
+          🔙 Back
         </button>
+
 
         <div className="grid md:grid-cols-2 gap-10">
 
-          {/* LEFT IMAGE GALLERY */}
+
+          {/* ================= LEFT IMAGES ================= */}
           <div>
             <img
               src={`${API}/${activeImage}`}
@@ -81,62 +85,73 @@ function ProductDetails() {
             </div>
           </div>
 
-          {/* RIGHT DETAILS */}
+
+
+          {/* ================= RIGHT DETAILS ================= */}
           <div className="space-y-4">
 
             <h2 className="text-3xl font-bold">{product.title}</h2>
 
-            <p className="text-gray-500">
-              Brand: {product.brand} | Category: {product.category}
+
+            {/* BRAND + CATEGORY */}
+            <p className="text-gray-600">
+              Brand: {product.brand?.name || "-"} | 
+              Category: {product.category?.name || "-"}
             </p>
 
-            {/* Rating */}
+
+            {/* RATING */}
             <div className="flex items-center gap-2 text-yellow-500">
               <FaStar />
               {product.rating || 4}
             </div>
 
-            {/* ✅ PRICE (INR formatted) */}
-            <div>
-              {product.discountPercent ? (
-                <>
-                  <span className="text-3xl font-bold text-green-600">
-                    ₹ {discountPrice}
-                  </span>
 
-                  <span className="line-through ml-3 text-gray-400">
-                    ₹ {product.price}
-                  </span>
+            {/* ================= PRICE + OFFER ================= */}
+            {hasOffer ? (
+              <div className="flex items-center gap-3">
 
-                  <span className="ml-2 text-red-500">
-                    {product.discountPercent}% OFF
-                  </span>
-                </>
-              ) : (
                 <span className="text-3xl font-bold text-green-600">
+                  ₹ {product.finalPrice}
+                </span>
+
+                <span className="line-through text-gray-400">
                   ₹ {product.price}
                 </span>
-              )}
-            </div>
 
-            {/* Stock */}
+                <span className="bg-red-600 text-white text-xs px-2 py-1 rounded">
+                  {product.discountPercent}% OFF
+                </span>
+
+              </div>
+            ) : (
+              <span className="text-3xl font-bold text-green-600">
+                ₹ {product.price}
+              </span>
+            )}
+
+
+            {/* STOCK */}
             <p className={product.stock > 0 ? "text-green-600" : "text-red-500"}>
               {product.stock > 0 ? "In Stock" : "Out of Stock"}
             </p>
 
-            {/* Description */}
+
+            {/* DESCRIPTION */}
             <p className="text-gray-600">{product.description}</p>
 
-            {/* Warranty + Return */}
-            <div className="bg-amber-200 p-3 rounded-lg text-sm">
+
+            {/* WARRANTY */}
+            <div className="bg-amber-200 p-3 font-mono rounded-lg text-sm">
               <p>Warranty: {product.warrantyInformation || "No warranty"}</p>
               <p>Return: {product.returnPolicy || "No return policy"}</p>
             </div>
 
-            {/* Add to Cart */}
+
+            {/* ADD TO CART */}
             <button
               onClick={addToCart}
-              className="bg-amber-700 text-white px-6 py-3 rounded-lg flex items-center gap-2 hover:bg-gray-800 transition"
+              className="bg-amber-700 text-white px-6 py-3 rounded-lg flex items-center gap-2 hover:bg-gray-900 transition"
             >
               <FaCartPlus />
               Add to Cart
