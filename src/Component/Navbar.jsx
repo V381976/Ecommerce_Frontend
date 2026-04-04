@@ -166,7 +166,7 @@ function Navbar() {
           <Link onClick={() => setOpen(false)} to="/my-order" className="gap-2 ml-4">My Orders</Link>
           <button onClick={logout} className="text-red-400">Logout</button>
         </>
-      ) : (
+      ) : ( 
         <div className="flex gap-3 pt-3">
           <Link to="/login" className="bg-white text-indigo-600 px-4 py-2 rounded-lg">
             Login

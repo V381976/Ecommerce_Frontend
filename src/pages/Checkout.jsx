@@ -26,17 +26,62 @@ export default function Checkout() {
 
 
 
-  const placeOrder = async () => {
+ const placeOrder = async () => {
 
-    await axios.post(`${API}/orders/create`, 
-     { userId, address,  paymentMethod} ,
+  // ✅ COD flow
+  if (paymentMethod === "COD") {
+
+    await axios.post(
+      `${API}/orders/create`,
+      { userId, address, paymentMethod: "COD" },
       { withCredentials: true }
     );
 
-    alert("✅ Order placed successfully");
-
+    alert("Order placed (COD)");
     navigate("/my-order");
-  };
+    return;
+  }
+
+
+  // ✅ ONLINE flow (Razorpay)
+  if (paymentMethod === "ONLINE") {
+
+    // 1️⃣ create order from backend
+    const { data: order } = await axios.post( `${API}/payment/create-order`,
+      { amount: 500 }, // later cart total bhejna
+      { withCredentials: true }
+    );
+
+    const options = {
+      key: import.meta.env.VITE_RAZORPAY_KEY,
+      amount: order.amount,
+      currency: "INR",
+      order_id: order.id,
+
+      handler: async function (response) {
+
+        // 2️⃣ verify + create order in DB
+        await axios.post(
+          `${API}/orders/create`,
+          {
+            userId,
+            address,
+            paymentMethod: "ONLINE",
+            paymentId: response.razorpay_payment_id
+          },
+          { withCredentials: true }
+        );
+
+        alert("Payment Success ✅");
+        navigate("/my-order");
+      }
+    };
+
+    const rzp = new window.Razorpay(options);
+    rzp.open();
+  }
+};
+
 
 
 

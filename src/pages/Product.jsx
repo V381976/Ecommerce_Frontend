@@ -96,6 +96,7 @@ function Product() {
             md:grid-cols-3 
             lg:grid-cols-4 
             gap-6
+          
           "
         >
           {filteredProducts.map((product) => (

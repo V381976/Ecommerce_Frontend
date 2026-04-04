@@ -55,12 +55,11 @@ function Home() {
   return (
     <div className="min-h-screen text-white px-6 ">
 
-      {/* ================= HERO BANNER SLIDER ================= */}
-     {/* ================= HERO BANNER SLIDER ================= */}
+
 {/* ================= HERO BANNER SLIDER ================= */}
 {banners.length > 0 && (
   <div
-    className="w-full pt-5 relative"
+    className="w-full h-full pt-5 relative"
     onMouseEnter={() => setPause(true)}
     onMouseLeave={() => setPause(false)}
   >
@@ -79,7 +78,7 @@ function Home() {
   className="
     absolute inset-0
     w-full h-full
-    object-cover   /* ⭐ IMPORTANT FIX */
+    object-contain   /* ⭐ IMPORTANT FIX */
     cursor-pointer
     select-none " />
 
